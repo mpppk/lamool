@@ -1,0 +1,58 @@
+{
+  "name": "lamool",
+  "version": "0.0.1",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "test": "jest",
+    "codecov": "npm run test && codecov",
+    "doc": "typedoc --out ./docs -m \"umd\"",
+    "lint": "npm run pretty-quick && tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx' 'test/**/*.ts' --fix",
+    "pretty-quick": "pretty-quick",
+    "precommit": "pretty-quick --staged"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfigFile": "tsconfig.json"
+      }
+    },
+    "testMatch": [
+      "**/__tests__/*.+(ts|tsx|js)"
+    ],
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true
+  },
+  "keywords": [],
+  "author": "mpppk",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^23.3.1",
+    "@types/node": "^10.0.3",
+    "codecov": "^3.1.0",
+    "husky": "^1.0.0",
+    "jest": "^23.5.0",
+    "prettier": "^1.14.2",
+    "pretty-quick": "^1.6.0",
+    "source-map-support": "^0.5.0",
+    "ts-jest": "^23.1.4",
+    "ts-loader": "^4.5.0",
+    "tslint": "^5.5.0",
+    "tslint-config-prettier": "^1.15.0",
+    "typedoc": "^0.11.0",
+    "typescript": "^3.0.3",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2"
+  },
+  "dependencies": {}
+}
