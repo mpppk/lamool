@@ -7,13 +7,13 @@ export interface IContext {
   functionName: string
 }
 
-type Callback = (error: Error | null, result: object) => void
-type LambdaFunction = (event: object, context: IContext, callback: Callback) => void
+type Callback<T> = (error: Error | null, result: T) => void
+type LambdaFunction<T> = (event: object, context: IContext, callback: Callback<T>) => void
 
 export class Lamool {
-  private funcMap = new Map<string, LambdaFunction>();
+  private funcMap = new Map<string, LambdaFunction<any>>();
 
-  public createFunction(name: string, func: LambdaFunction): boolean {
+  public createFunction<T>(name: string, func: LambdaFunction<T>): boolean {
     if (this.funcMap.has(name)) {
       return false;
     }
@@ -21,7 +21,7 @@ export class Lamool {
     return true
   }
 
-  public invoke(params: IInvokeParams, callback: Callback) {
+  public invoke<T>(params: IInvokeParams, callback: Callback<T>) {
     if (!this.funcMap.has(params.FunctionName)) {
       throw new Error("function not found");
     }

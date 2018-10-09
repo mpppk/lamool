@@ -10,7 +10,7 @@ it('execute lamool', () => {
   lamool.createFunction('hello',
     (_event, _context, callback) => {callback(null, {message})});
   lamool.invoke({FunctionName: 'hello', Payload: {}},
-    (_, result) => {
-      expect((result as IMessage).message).toBe((message));
+    (_, result: IMessage) => {
+      expect(result.message).toBe((message));
   });
 });
