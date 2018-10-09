@@ -1,5 +1,3 @@
-export const message = 'hello';
-
 export interface IInvokeParams {
   FunctionName: string
   Payload: object
