@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "test": "jest",
+    "test": "node --experimental-worker ./node_modules/.bin/jest --verbose false",
     "codecov": "npm run test && codecov",
     "doc": "typedoc --out ./docs -m \"umd\"",
     "lint": "npm run pretty-quick && tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx' 'test/**/*.ts' --fix",
