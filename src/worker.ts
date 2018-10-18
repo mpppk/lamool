@@ -1,10 +1,20 @@
+export interface IUniversalWorkerOption {
+  root: string;
+}
 
 export class UniversalWorker {
   private worker: any;
-  constructor(filePath: string, opt?: any) {
+  private readonly rootPath = process.argv[1];
+  constructor(filePath: string, opt?: Partial<IUniversalWorkerOption>) {
     if (isNode() && hasNodejsWorker()) {
+      const path = require('path');
       const { Worker } = require('worker_threads');
-      this.worker = new Worker(filePath);
+
+      if (opt && opt.root) {
+        this.rootPath = opt.root;
+      }
+
+      this.worker = new Worker(path.join(this.rootPath, filePath));
       return
     }
 
