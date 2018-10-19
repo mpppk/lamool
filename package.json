@@ -7,6 +7,7 @@
     "build": "webpack",
     "watch": "webpack --watch",
     "test": "node --experimental-worker ./node_modules/.bin/jest --verbose false",
+    "test:browser": "webpack-dev-server --config webpack.sandbox.config.js",
     "codecov": "npm run test && codecov",
     "doc": "typedoc --out ./docs -m \"umd\"",
     "lint": "npm run pretty-quick && tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx' 'test/**/*.ts' --fix",
@@ -40,6 +41,8 @@
     "@types/jest": "^23.3.1",
     "@types/node": "^10.0.3",
     "codecov": "^3.1.0",
+    "copy-webpack-plugin": "^4.5.4",
+    "html-webpack-plugin": "^3.2.0",
     "husky": "^1.0.0",
     "jest": "^23.5.0",
     "prettier": "^1.14.2",
@@ -52,7 +55,8 @@
     "typedoc": "^0.11.0",
     "typescript": "^3.0.3",
     "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2"
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.9"
   },
   "dependencies": {}
 }

@@ -7,7 +7,7 @@ it('can execute in nodejs', (done) => {
     {root: path.join(process.cwd(), '__tests__')});
   const message = 'hello from main thread';
 
-  worker.on('message', (msg) => {
+  worker.onmessage((msg) => {
     expect(msg).toBe(message);
     worker.postMessage('exit');
     done();
