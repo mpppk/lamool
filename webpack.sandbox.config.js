@@ -1,5 +1,4 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -19,11 +18,5 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin(),
-    new CopyWebpackPlugin([
-      { from: 'src/echo-worker.js'},
-    ]),
   ],
-  externals: {
-    worker_threads: 'IgnoredWorker',
-  }
 };
