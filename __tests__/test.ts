@@ -1,16 +1,20 @@
 import { Lamool } from '../src/lamool';
 
 interface IMessage {
-  message: string
+  message: string;
 }
 
-it('execute lamool', () => {
+it('execute lamool', (done) => {
   const lamool = new Lamool();
-  const message = 'hello world';
-  lamool.createFunction('hello',
-    (_event, _context, callback) => {callback(null, {message})});
-  lamool.invoke({FunctionName: 'hello', Payload: {}},
-    (_, result: IMessage) => {
-      expect(result.message).toBe((message));
+  lamool.createFunction('hello', (_event, _context, callback) => {
+    callback(null, { message: 'hello world' });
+  });
+
+  lamool.invoke({ FunctionName: 'hello', Payload: {} }, (err, result: IMessage | null) => {
+    if (err) {
+      fail(err);
+    }
+    expect(result!.message).toBe('hello world');
+    done();
   });
 });
