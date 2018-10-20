@@ -1,17 +1,7 @@
-import * as path from 'path';
-import { UniversalWorker } from '../src/worker';
-
-it('can execute in nodejs', (done) => {
-  const worker = new UniversalWorker(
-    'worker/echo-worker.js',
-    {root: path.join(process.cwd(), '__tests__')});
-  const message = 'hello from main thread';
-
-  worker.onmessage((msg) => {
-    expect(msg).toBe(message);
-    worker.postMessage('exit');
-    done();
-  });
-
-  worker.postMessage(message);
+import * as workerpool from 'workerpool';
+it('can execute workerpool', async () => {
+  const add = (a: number, b: number) => a + b;
+  const pool = workerpool.pool();
+  const result = await pool.exec(add, [2, 3]);
+  expect(result).toBe(5);
 });

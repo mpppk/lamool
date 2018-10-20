@@ -14,3 +14,4 @@ it('execute lamool', () => {
       expect(result.message).toBe((message));
   });
 });
+

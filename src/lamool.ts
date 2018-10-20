@@ -1,3 +1,5 @@
+import * as workerpool from 'workerpool';
+import { WorkerPool } from 'workerpool';
 export interface IInvokeParams {
   FunctionName: string
   Payload: object
@@ -12,6 +14,11 @@ type LambdaFunction<T> = (event: object, context: IContext, callback: Callback<T
 
 export class Lamool {
   private funcMap = new Map<string, LambdaFunction<any>>();
+  private pool: WorkerPool;
+
+  constructor() {
+    this.pool = workerpool.pool();
+  }
 
   public createFunction<T>(name: string, func: LambdaFunction<T>): boolean {
     if (this.funcMap.has(name)) {
@@ -26,7 +33,7 @@ export class Lamool {
       throw new Error("function not found");
     }
     const func = this.funcMap.get(params.FunctionName)!;
-    func(params.Payload, {functionName: params.FunctionName}, callback);
+    this.pool.exec(func, [params.Payload, {functionName: params.FunctionName}, callback]);
   }
 }
 
