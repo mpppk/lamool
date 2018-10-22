@@ -2,10 +2,10 @@
   "name": "lamool",
   "version": "0.0.1",
   "description": "",
-  "main": "main.js",
+  "main": "src/lamool.js",
   "scripts": {
-    "build": "webpack",
-    "watch": "webpack --watch",
+    "build": "tsc",
+    "watch": "tsc --watch",
     "test": "jest --verbose false --detectOpenHandles --collectCoverageFrom=!__tests__/worker.ts",
     "test:browser": "webpack-dev-server --config webpack.sandbox.config.js",
     "codecov": "npm run test && codecov",
@@ -14,6 +14,10 @@
     "pretty-quick": "pretty-quick",
     "precommit": "pretty-quick --staged"
   },
+  "files": [
+    "src/lamool.js"
+  ],
+  "types": "src/lamool.d.ts",
   "jest": {
     "moduleFileExtensions": [
       "ts",
