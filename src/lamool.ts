@@ -55,7 +55,7 @@ export class Lamool {
 export const requireFromString = (code: string): any => {
   const wrapperFuncCode = 'const module = {exports: {}};' +
     'const exports = module.exports;' +
-    code + '; return exports;';
+    code + '; return module.exports;';
   return Function( wrapperFuncCode)();
 };
 

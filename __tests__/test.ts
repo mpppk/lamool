@@ -19,7 +19,14 @@ it('execute lamool', (done) => {
   });
 });
 
-it('requireFromString', () => {
+it('requireFromString: exports', () => {
   const exports = requireFromString('exports.handler = (a) => {return a+a;}');
   expect(exports.handler(3)).toBe(6);
+});
+
+it('requireFromString: module.exports', () => {
+  const exports = requireFromString('module.exports.handler = (a) => {return a+a;}');
+  expect(exports.handler(3)).toBe(6);
+  const handler = requireFromString('module.exports = (a) => {return a+a;}');
+  expect(handler(3)).toBe(6);
 });
