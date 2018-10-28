@@ -1,15 +1,14 @@
 import { Lamool, requireFromString } from './lamool';
 
-interface IMessage {
-  message: string;
-}
-
 const lamool = new Lamool();
 lamool.createFunction('hello', (_event, _context, callback) => {
   callback(null, { message: 'hello world' });
 });
-lamool.invoke({ FunctionName: 'hello', Payload: {} }, (_, result: IMessage | null) => {
-  console.log(result); // tslint:disable-line no-console
+lamool.invoke({ FunctionName: 'hello', Payload: {} }, (_, result) => {
+  if (!result.Payload) {
+    console.error('payload does not exist');
+  }
+  console.log(JSON.parse(result.Payload as string)); // tslint:disable-line no-console
 });
 
 (async () => {
@@ -21,3 +20,4 @@ lamool.invoke({ FunctionName: 'hello', Payload: {} }, (_, result: IMessage | nul
   const exports = requireFromString(await res.text());
   console.log(exports.handler(3)/* => will be 6 */); // tslint:disable-line
 })();
+

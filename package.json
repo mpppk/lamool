@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "test": "jest --verbose false --detectOpenHandles --collectCoverageFrom=!__tests__/worker.ts",
+    "test": "jest --verbose false --detectOpenHandles --collectCoverageFrom=!__tests__/*.ts",
     "test:browser": "webpack-dev-server --config webpack.sandbox.config.js",
     "codecov": "npm run test && codecov",
     "doc": "typedoc --out ./docs -m \"umd\"",
@@ -36,7 +36,7 @@
       "**/__tests__/*.+(ts|tsx)"
     ],
     "coverageDirectory": "./coverage/",
-    "collectCoverage": true,
+    "collectCoverage": false,
     "testEnvironment": "node"
   },
   "keywords": [],
@@ -65,6 +65,7 @@
     "webpack-dev-server": "^3.1.9"
   },
   "dependencies": {
+    "aws-sdk": "^2.344.0",
     "workerpool": "^2.3.3"
   }
 }
