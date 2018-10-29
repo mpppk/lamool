@@ -107,13 +107,11 @@ const toAWSError = (err: Error): AWSError => {
 };
 
 const toInvocationResponse = (data: any): InvocationResponse => {
-  return {
-    ExecutedVersion: 'lambda',
-    FunctionError: 'dummy',
-    LogResult: 'dummy',
-    Payload: JSON.stringify(data),
-    StatusCode: -1,
-  };
+  const res: InvocationResponse = {StatusCode: 200};
+  if (data) {
+    res.Payload = JSON.stringify(data);
+  }
+  return res;
 };
 
 export const requireFromString = (code: string): any => {
