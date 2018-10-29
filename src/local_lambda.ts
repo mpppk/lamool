@@ -40,7 +40,8 @@ export class LocalLambda {
 
     this.pool
       .exec(wrappedFunc, [func.toString(), params.Payload, { functionName: params.FunctionName }])
-      .then(results => callback(null, toInvocationResponse(results)), err => callback(toAWSError(err), toInvocationResponse(null)));
+      .then(results => callback(null, toInvocationResponse(results)),
+          err => callback(null, toFailedInvocationResponse(err)));
   }
 
   public hasAvailableWorker(): boolean {
@@ -48,6 +49,7 @@ export class LocalLambda {
   }
 }
 
+// @ts-ignore
 const toAWSError = (err: Error): AWSError => {
   const stack = err.stack ? err.stack : '';
   const _stack = stack.split("\n");
@@ -64,7 +66,7 @@ const toAWSError = (err: Error): AWSError => {
     requestId: 'dummy',
     retryDelay: -1,
     retryable: true,
-    statusCode: -1,
+    statusCode: 200,
     time: new Date(),
   };
 };
@@ -75,4 +77,28 @@ const toInvocationResponse = (data: any): InvocationResponse => {
     res.Payload = JSON.stringify(data);
   }
   return res;
+};
+
+const toFailedInvocationResponse = (err: Error): InvocationResponse => {
+  const res: InvocationResponse = {FunctionError: 'Handled', StatusCode: 200};
+  if (err) {
+    res.Payload = JSON.stringify(toPayloadError(err));
+  }
+  return res;
+};
+
+interface IPayloadError {
+  errorMessage: string;
+  errorType: string;
+  stackTrace: string[];
+}
+
+const toPayloadError = (err: Error): IPayloadError => {
+  const stack = err.stack ? err.stack : '';
+  const _stack = stack.split("\n");
+  return {
+    errorMessage: err.message,
+    errorType: err.name,
+    stackTrace: _stack,
+  };
 };

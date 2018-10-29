@@ -1,7 +1,7 @@
 import { requireFromString } from '../src/lamool';
 import { LocalLambda } from '../src/local_lambda';
 
-it('execute LocalLambda', (done) => {
+it('return values via callback', (done) => {
   const localLambda = new LocalLambda();
   localLambda.createFunction('hello', (_event, _context, callback) => {
     callback(null, { message: 'hello world' });
@@ -17,6 +17,34 @@ it('execute LocalLambda', (done) => {
     const payload = JSON.parse(result.Payload as string);
     expect(payload.message).toBe('hello world');
     done();
+  });
+});
+
+it('return error as payload if lambda function return error via callback', (done) => {
+  const localLambda = new LocalLambda();
+  const testError = new Error('error for test');
+  localLambda.createFunction('hello', (_event, _context, callback) => {
+    callback(new Error('error for test'), null); // FIXME
+  });
+
+  localLambda.invoke({ FunctionName: 'hello', Payload: {testError} }, (err, result) => {
+    if (err) {
+      fail(err);
+    }
+    if (!result || !result.Payload) {
+      fail('payload does not exist');
+    }
+    expect(result.FunctionError).toBe('Handled');
+    expect(typeof result.Payload).toBe('string');
+    try {
+      const payload = JSON.parse(result.Payload as string);
+      expect(payload.errorType).toBe(testError.name);
+      expect(payload.errorMessage).toBe(testError.message);
+      done();
+    } catch(e) {
+      fail(e);
+      done();
+    }
   });
 });
 
@@ -44,8 +72,13 @@ it('fetch function from requireFromString and pass to LocalLambda', (done) => {
     if (!result || !result.Payload) {
       fail('payload does not exist');
     }
-    const payload = JSON.parse(result.Payload as string);
-    expect(payload.message).toBe('hello world');
-    done();
+
+    try {
+      const payload = JSON.parse(result.Payload as string);
+      expect(payload.message).toBe('hello world');
+      done();
+    } catch(e) {
+      fail(e);
+    }
   });
 });
