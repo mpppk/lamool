@@ -1,12 +1,13 @@
-import { Lamool, requireFromString } from '../src/lamool';
+import { requireFromString } from '../src/lamool';
+import { LocalLambda } from '../src/local_lambda';
 
-it('execute lamool', (done) => {
-  const lamool = new Lamool();
-  lamool.createFunction('hello', (_event, _context, callback) => {
+it('execute LocalLambda', (done) => {
+  const localLambda = new LocalLambda();
+  localLambda.createFunction('hello', (_event, _context, callback) => {
     callback(null, { message: 'hello world' });
   });
 
-  lamool.invoke({ FunctionName: 'hello', Payload: {} }, (err, result) => {
+  localLambda.invoke({ FunctionName: 'hello', Payload: {} }, (err, result) => {
     if (err) {
       fail(err);
     }
@@ -31,12 +32,12 @@ it('requireFromString: module.exports', () => {
   expect(handler(3)).toBe(6);
 });
 
-it('fetch function from requireFromString and pass to lamool', (done) => {
-  const lamool = new Lamool();
+it('fetch function from requireFromString and pass to LocalLambda', (done) => {
+  const localLambda = new LocalLambda();
   const {handler} = requireFromString(`module.exports.handler = (_e, _c, cb) => {cb(null, {message: 'hello world'})}`);
-  lamool.createFunction('hello', handler);
+  localLambda.createFunction('hello', handler);
 
-  lamool.invoke({ FunctionName: 'hello', Payload: {} }, (err, result) => {
+  localLambda.invoke({ FunctionName: 'hello', Payload: {} }, (err, result) => {
     if (err) {
       fail(err);
     }
