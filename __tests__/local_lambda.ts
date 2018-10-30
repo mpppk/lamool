@@ -87,10 +87,23 @@ it('return error as payload if lambda function return error via callback', (done
   });
 });
 
-it('return error as payload if lambda function reject promise', () => {
-  // TODO
-});
+it('return error as payload if lambda function reject promise', (done) => {
+  const localLambda = new LocalLambda();
+  localLambda.createFunction('hello', (event) => {
+    throw new Error((event as any).errorMessage)
+  });
 
-it('return error if lambda function has syntax error', () => {
-  // TODO
+  const Payload = {errorMessage: 'error for test'}; // tslint:disable-line
+
+  localLambda.invoke({ FunctionName: 'hello', Payload}, (err, result) => {
+    if (err) {
+      fail(err);
+    }
+    if (!result || !result.Payload) {
+      fail('payload does not exist');
+    }
+    const newPayload = JSON.parse(result.Payload as string);
+    expect(newPayload.errorMessage).toBe(Payload.errorMessage);
+    done();
+  });
 });
