@@ -22,7 +22,10 @@ export class LocalLambda {
 
   public invoke(params: IInvokeParams, callback: InvokeCallback) {
     if (!this.funcMap.has(params.FunctionName)) {
-      throw new Error('function not found');
+      const err = new Error('Function not found: arn:aws:lambda:us-east-1:000000000000:function:noExistFunction');
+      err.name = 'ResourceNotFoundException';
+      callback(generateResourceNotFoundException(), null);
+      return;
     }
     const func = this.funcMap.get(params.FunctionName)!;
 
@@ -58,25 +61,28 @@ export class LocalLambda {
 }
 
 // @ts-ignore
-const toAWSError = (err: Error): AWSError => {
+const toAWSError = (err: Error): Partial<AWSError> => {
   const stack = err.stack ? err.stack : '';
   const _stack = stack.split("\n");
   _stack.shift();
   for (let i =0; i < _stack.length; i++){_stack[i] = _stack[i].trim().substr(3);}
   return {
-    cfId: 'dummy',
-    code: 'dummy',
-    extendedRequestId: 'dummy',
-    hostname: 'dummy',
+    code: err.name,
     message: err.message,
     name: err.name,
-    region: 'dummy',
-    requestId: 'dummy',
-    retryDelay: -1,
-    retryable: true,
-    statusCode: 200,
+    requestId: '8a0dc938-dc4a-11e8-9c76-b1f10c1bb367',
+    retryDelay: 50,
+    retryable: false,
+    stack: err.stack,
+    statusCode: 404,
     time: new Date(),
   };
+};
+
+const generateResourceNotFoundException = (): AWSError => {
+  const err = new Error('Function not found: arn:aws:lambda:us-east-1:000000000000:function:noExistFunction');
+  err.name = 'ResourceNotFoundException';
+  return toAWSError(err) as AWSError;
 };
 
 const toInvocationResponse = (data: any): InvocationResponse => {

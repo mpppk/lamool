@@ -11,5 +11,5 @@ export interface IContext {
 }
 
 export type Callback<T> = (error: Error | null, result: T | null) => void;
-export type InvokeCallback = (err: AWSError | null, data: Lambda.Types.InvocationResponse) => void;
+export type InvokeCallback = (err: AWSError | null, data: Lambda.Types.InvocationResponse | null) => void;
 export type LambdaFunction<T> = (event: object, context: IContext, callback: Callback<T>) => void;
