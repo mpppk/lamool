@@ -46,12 +46,12 @@ it('can handle event payload', (done) => {
 
 it('return error as payload if lambda function return error via callback', (done) => {
   const localLambda = new LocalLambda();
-  const testError = new Error('error for test');
-  localLambda.createFunction('hello', (_event, _context, callback) => {
-    callback(new Error('error for test'), null); // FIXME
+  const errorMessage = 'error for test';
+  localLambda.createFunction('hello', (event, _context, callback) => {
+    callback(new Error((event as any).errorMessage), null); // FIXME
   });
 
-  localLambda.invoke({ FunctionName: 'hello', Payload: {testError} }, (err, result) => {
+  localLambda.invoke({ FunctionName: 'hello', Payload: {errorMessage} }, (err, result) => {
     if (err) {
       fail(err);
     }
@@ -62,8 +62,8 @@ it('return error as payload if lambda function return error via callback', (done
     expect(typeof result.Payload).toBe('string');
     try {
       const payload = JSON.parse(result.Payload as string);
-      expect(payload.errorType).toBe(testError.name);
-      expect(payload.errorMessage).toBe(testError.message);
+      expect(payload.errorType).toBe('Error');
+      expect(payload.errorMessage).toBe(errorMessage);
       done();
     } catch(e) {
       fail(e);
