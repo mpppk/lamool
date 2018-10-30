@@ -29,12 +29,20 @@ export class LocalLambda {
     const wrappedFunc = (funcStr: string, event: object, context: IContext): Promise<any> => {
       const f: LambdaFunction<any> = new Function('return ' + funcStr)();
       return new Promise((resolve, reject) => {
-        f(event, context, (err, res) => {
-          if (err) {
-            reject(err);
+        try {
+          // TODO: Implement timeout
+          const result = f(event, context, (err, res) => {
+            if (err) {
+              reject(err);
+            }
+            resolve(res);
+          });
+          if (result) {
+            resolve(result);
           }
-          resolve(res);
-        });
+        } catch (e) {
+          reject(e);
+        }
       });
     };
 
