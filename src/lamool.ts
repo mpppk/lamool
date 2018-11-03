@@ -42,3 +42,11 @@ export const requireFromString = (code: string): any => {
     code + '; return module.exports;';
   return Function( wrapperFuncCode)();
 };
+
+export const requireFromURL = async (url: string): Promise<any> => {
+  const res = await fetch(url);
+  if (!res.body) {
+    throw new Error('failed to require from ' + url);
+  }
+  return requireFromString(await res.text());
+};
