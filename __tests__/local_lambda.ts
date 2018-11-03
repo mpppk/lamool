@@ -1,10 +1,22 @@
+import { LambdaFunction } from '../src/lambda';
 import { LocalLambda } from '../src/local_lambda';
+
+const generateCreateFunctionRequest = <T>(name: string, handler: LambdaFunction<T>) => { // tslint:disable-line
+   return {
+     Code: {},
+     FunctionBody: handler,
+     FunctionName: name,
+     Handler: 'index.handler',
+     Role: '-',
+     Runtime: 'nodejs8.10',
+  };
+};
 
 it('return values via callback', (done) => {
   const localLambda = new LocalLambda();
-  localLambda.createFunction('hello', (_event, _context, callback) => {
+  localLambda.createFunction(generateCreateFunctionRequest('hello', (_event, _context, callback) => {
     callback(null, { message: 'hello world' });
-  });
+  }));
 
   localLambda.invoke({ FunctionName: 'hello', Payload: {} }, (err, result) => {
     if (err) {
@@ -21,9 +33,9 @@ it('return values via callback', (done) => {
 
 it('return values via return syntax', (done) => {
   const localLambda = new LocalLambda();
-  localLambda.createFunction('hello', () => {
-    return {message: 'hello world'};
-  });
+  localLambda.createFunction(generateCreateFunctionRequest('hello', () => {
+    return { message: 'hello world' };
+  }));
 
   localLambda.invoke({ FunctionName: 'hello', Payload: {} }, (err, result) => {
     if (err) {
@@ -40,9 +52,9 @@ it('return values via return syntax', (done) => {
 
 it('can handle event payload', (done) => {
   const localLambda = new LocalLambda();
-  localLambda.createFunction('hello', (event, _context, callback) => {
+  localLambda.createFunction(generateCreateFunctionRequest('hello', (event, _context, callback) => {
     callback(null, { message: (event as any).message });
-  });
+  }));
 
   const Payload = {message: 'hello'}; // tslint:disable-line
 
@@ -62,9 +74,9 @@ it('can handle event payload', (done) => {
 it('return error as payload if lambda function return error via callback', (done) => {
   const localLambda = new LocalLambda();
   const errorMessage = 'error for test';
-  localLambda.createFunction('hello', (event, _context, callback) => {
+  localLambda.createFunction(generateCreateFunctionRequest('hello', (event, _context, callback) => {
     callback(new Error((event as any).errorMessage), null); // FIXME
-  });
+  }));
 
   localLambda.invoke({ FunctionName: 'hello', Payload: {errorMessage} }, (err, result) => {
     if (err) {
@@ -89,9 +101,9 @@ it('return error as payload if lambda function return error via callback', (done
 
 it('return error as payload if lambda function reject promise', (done) => {
   const localLambda = new LocalLambda();
-  localLambda.createFunction('hello', (event) => {
-    throw new Error((event as any).errorMessage)
-  });
+  localLambda.createFunction(generateCreateFunctionRequest('hello', (event) => {
+    throw new Error((event as any).errorMessage);
+  }));
 
   const Payload = {errorMessage: 'error for test'}; // tslint:disable-line
 

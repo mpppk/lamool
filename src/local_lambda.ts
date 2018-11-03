@@ -1,8 +1,12 @@
 import { AWSError } from 'aws-sdk';
-import { InvocationResponse } from 'aws-sdk/clients/lambda';
+import { CreateFunctionRequest, InvocationResponse, Types } from 'aws-sdk/clients/lambda';
 import * as workerpool from 'workerpool';
 import { WorkerPool } from 'workerpool';
-import { IContext, IInvokeParams, InvokeCallback, LambdaFunction } from './lambda';
+import { Callback, IContext, IInvokeParams, InvokeCallback, LambdaFunction } from './lambda';
+
+interface ICreateLocalFunctionRequest<T> extends CreateFunctionRequest {
+  FunctionBody: LambdaFunction<T>;
+}
 
 export class LocalLambda {
   private funcMap = new Map<string, LambdaFunction<any>>();
@@ -12,12 +16,15 @@ export class LocalLambda {
     this.pool = workerpool.pool();
   }
 
-  public createFunction<T>(name: string, func: LambdaFunction<T>): boolean {
-    if (this.funcMap.has(name)) {
-      return false;
+  public createFunction<T>(params: ICreateLocalFunctionRequest<T>, callback?: Callback<Types.FunctionConfiguration>): void {
+    if (this.funcMap.has(params.FunctionName)) {
+      // TODO throw exception
+      return;
     }
-    this.funcMap.set(name, func);
-    return true;
+    this.funcMap.set(params.FunctionName, params.FunctionBody);
+    if (callback) {
+      callback(null, {FunctionName: params.FunctionName});
+    }
   }
 
   public invoke(params: IInvokeParams, callback: InvokeCallback) {
