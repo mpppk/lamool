@@ -1,54 +1,38 @@
-import * as workerpool from 'workerpool';
-import { WorkerPool } from 'workerpool';
-export interface IInvokeParams {
-  FunctionName: string;
-  Payload: object;
-}
+import { InvocationRequest } from 'aws-sdk/clients/lambda';
+import * as Lambda from 'aws-sdk/clients/lambda';
+import { IInvokeParams, InvokeCallback } from './lambda';
+import { LocalLambda } from './local_lambda';
 
-export interface IContext {
-  functionName: string;
+export interface ILamoolOption {
+  offloadToLambda: boolean;
 }
-
-type Callback<T> = (error: Error | null, result: T | null) => void;
-type LambdaFunction<T> = (event: object, context: IContext, callback: Callback<T>) => void;
 
 export class Lamool {
-  private funcMap = new Map<string, LambdaFunction<any>>();
-  private pool: WorkerPool;
+  private readonly lambda: Lambda | null = null;
+  private readonly localLambda: LocalLambda;
+  private readonly opt: Partial<ILamoolOption>;
 
-  constructor() {
-    this.pool = workerpool.pool();
+  constructor(opt?: Partial<ILamoolOption>) {
+    this.opt = opt || {};
+    if (this.opt.offloadToLambda) {
+      this.lambda = new Lambda({apiVersion: '2015-03-31'});
+    }
+    this.localLambda = new LocalLambda();
   }
 
-  public createFunction<T>(name: string, func: LambdaFunction<T>): boolean {
-    if (this.funcMap.has(name)) {
-      return false;
+  public invoke(params: IInvokeParams, callback: InvokeCallback) {
+    if (this.opt.offloadToLambda && !this.localLambda.hasAvailableWorker()) {
+      this.invokeOnLambda(params, callback);
+      return;
     }
-    this.funcMap.set(name, func);
-    return true;
+    this.localLambda.invoke(params, callback);
   }
 
-  public invoke<T>(params: IInvokeParams, callback: Callback<T>) {
-    if (!this.funcMap.has(params.FunctionName)) {
-      throw new Error('function not found');
+  private invokeOnLambda(params: InvocationRequest, callback: InvokeCallback) {
+    if (!this.lambda) {
+      throw new Error('lambda is not available');
     }
-    const func = this.funcMap.get(params.FunctionName)!;
-
-    const wrappedFunc = (funcStr: string, event: object, context: IContext): Promise<any> => {
-      const f: LambdaFunction<any> = new Function('return ' + funcStr)();
-      return new Promise((resolve, reject) => {
-        f(event, context, (err, res) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(res);
-        });
-      });
-    };
-
-    this.pool
-      .exec(wrappedFunc, [func.toString(), params.Payload, { functionName: params.FunctionName }])
-      .then(results => callback(null, results), err => callback(err, null));
+    this.lambda.invoke(params, callback);
   }
 }
 
@@ -59,3 +43,10 @@ export const requireFromString = (code: string): any => {
   return Function( wrapperFuncCode)();
 };
 
+export const requireFromURL = async (url: string): Promise<any> => {
+  const res = await fetch(url);
+  if (!res.body) {
+    throw new Error('failed to require from ' + url);
+  }
+  return requireFromString(await res.text());
+};
