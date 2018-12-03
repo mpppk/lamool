@@ -3,12 +3,17 @@ import { CreateFunctionRequest, InvocationResponse, Types } from 'aws-sdk/client
 import * as workerpool from 'workerpool';
 import { WorkerPool } from 'workerpool';
 import { Callback, IContext, IInvokeParams, InvokeCallback, LambdaFunction } from './lambda';
-
-interface ICreateLocalFunctionRequest<T> extends CreateFunctionRequest {
-  FunctionBody: LambdaFunction<T>;
-}
+import { zipToFunc } from './util';
 
 export class LocalLambda {
+  private static parseHandler(handler: string): [string, string] {
+    const fileAndHandlerName = handler.split('.');
+    if (fileAndHandlerName.length !== 2) {
+      throw new Error('invalid Handler: ' + handler);
+    }
+    return [fileAndHandlerName[0] + '.js', fileAndHandlerName[1]]
+  }
+
   private funcMap = new Map<string, LambdaFunction<any>>();
   private readonly pool: WorkerPool;
 
@@ -16,12 +21,26 @@ export class LocalLambda {
     this.pool = workerpool.pool();
   }
 
-  public createFunction<T>(params: ICreateLocalFunctionRequest<T>, callback?: Callback<Types.FunctionConfiguration>): void {
+  public async createFunction(params: CreateFunctionRequest, callback?: Callback<Types.FunctionConfiguration>) {
     if (this.funcMap.has(params.FunctionName)) {
       // TODO throw exception
       return;
     }
-    this.funcMap.set(params.FunctionName, params.FunctionBody);
+
+    if (!params.Code.ZipFile) {
+      throw new Error('ZipFile property does not exist');
+    }
+
+    const zipFile = params.Code.ZipFile;
+    if (typeof zipFile === 'string') {
+      throw new Error('ZipFile format is only accepted [Buffer | Blob]');
+    }
+
+
+    const [fileName, handlerName] = LocalLambda.parseHandler(params.Handler);
+    const functionBody = await zipToFunc(zipFile as Blob | Buffer, fileName, handlerName); // FIXME
+
+    this.funcMap.set(params.FunctionName, functionBody);
     if (callback) {
       callback(null, {FunctionName: params.FunctionName});
     }

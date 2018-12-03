@@ -1,10 +1,11 @@
+import { CreateFunctionRequest } from 'aws-sdk/clients/lambda';
+import { LocalLambda } from '../src';
 import { LambdaFunction } from '../src/lambda';
-import { LocalLambda } from '../src/local_lambda';
+import { funcToZip } from '../src/util';
 
-const generateCreateFunctionRequest = <T>(name: string, handler: LambdaFunction<T>) => { // tslint:disable-line
+const generateCreateFunctionRequest = <T>(name: string, handler: LambdaFunction<T>): CreateFunctionRequest => { // tslint:disable-line
    return {
-     Code: {},
-     FunctionBody: handler,
+     Code: {ZipFile: funcToZip(handler)},
      FunctionName: name,
      Handler: 'index.handler',
      Role: '-',
@@ -12,9 +13,9 @@ const generateCreateFunctionRequest = <T>(name: string, handler: LambdaFunction<
   };
 };
 
-it('return values via callback', (done) => {
+it('return values via callback', async (done) => {
   const localLambda = new LocalLambda();
-  localLambda.createFunction(generateCreateFunctionRequest('hello', (_event, _context, callback) => {
+  await localLambda.createFunction(generateCreateFunctionRequest('hello', (_event, _context, callback) => {
     callback(null, { message: 'hello world' });
   }));
 
@@ -31,9 +32,9 @@ it('return values via callback', (done) => {
   });
 });
 
-it('return values via return syntax', (done) => {
+it('return values via return syntax', async (done) => {
   const localLambda = new LocalLambda();
-  localLambda.createFunction(generateCreateFunctionRequest('hello', () => {
+  await localLambda.createFunction(generateCreateFunctionRequest('hello', () => {
     return { message: 'hello world' };
   }));
 
@@ -50,9 +51,9 @@ it('return values via return syntax', (done) => {
   });
 });
 
-it('can handle event payload', (done) => {
+it('can handle event payload', async (done) => {
   const localLambda = new LocalLambda();
-  localLambda.createFunction(generateCreateFunctionRequest('hello', (event, _context, callback) => {
+  await localLambda.createFunction(generateCreateFunctionRequest('hello', (event, _context, callback) => {
     callback(null, { message: (event as any).message });
   }));
 
@@ -71,10 +72,10 @@ it('can handle event payload', (done) => {
   });
 });
 
-it('return error as payload if lambda function return error via callback', (done) => {
+it('return error as payload if lambda function return error via callback', async (done) => {
   const localLambda = new LocalLambda();
   const errorMessage = 'error for test';
-  localLambda.createFunction(generateCreateFunctionRequest('hello', (event, _context, callback) => {
+  await localLambda.createFunction(generateCreateFunctionRequest('hello', (event, _context, callback) => {
     callback(new Error((event as any).errorMessage), null); // FIXME
   }));
 
@@ -99,9 +100,9 @@ it('return error as payload if lambda function return error via callback', (done
   });
 });
 
-it('return error as payload if lambda function reject promise', (done) => {
+it('return error as payload if lambda function reject promise', async (done) => {
   const localLambda = new LocalLambda();
-  localLambda.createFunction(generateCreateFunctionRequest('hello', (event) => {
+  await localLambda.createFunction(generateCreateFunctionRequest('hello', (event) => {
     throw new Error((event as any).errorMessage);
   }));
 
