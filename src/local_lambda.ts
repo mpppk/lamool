@@ -36,7 +36,6 @@ export class LocalLambda {
       throw new Error('ZipFile format is only accepted [Buffer | Blob]');
     }
 
-
     const [fileName, handlerName] = LocalLambda.parseHandler(params.Handler);
     const functionBody = await zipToFunc(zipFile as Blob | Buffer, fileName, handlerName); // FIXME
 
@@ -75,8 +74,17 @@ export class LocalLambda {
       });
     };
 
+    let payload = {};
+    if (params.Payload) {
+      try {
+        payload = JSON.parse(params.Payload);
+      } catch (e) {
+        throw new Error('failed to parse payload to json');
+      }
+    }
+
     this.pool
-      .exec(wrappedFunc, [func.toString(), params.Payload, { functionName: params.FunctionName }])
+      .exec(wrappedFunc, [func.toString(), payload, { functionName: params.FunctionName }])
       .then(results => callback(null, toInvocationResponse(results)),
           err => callback(null, toFailedInvocationResponse(err)));
   }

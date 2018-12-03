@@ -25,7 +25,7 @@ it('fetch function from requireFromString and pass to LocalLambda', async (done)
     Runtime: 'nodejs8.10',
   });
 
-  localLambda.invoke({ FunctionName: 'hello', Payload: {} }, (err, result) => {
+  localLambda.invoke({ FunctionName: 'hello' }, (err, result) => {
     if (err) {
       fail(err);
     }
