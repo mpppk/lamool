@@ -1,0 +1,8 @@
+{
+  "name": "lamool-node-sample",
+  "version": "0.0.1",
+  "dependencies": {
+    "aws-sdk": "^2.368.0",
+    "lamool": "file:../.."
+  }
+}
