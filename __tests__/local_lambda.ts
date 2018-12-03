@@ -19,7 +19,7 @@ it('return values via callback', async (done) => {
     callback(null, { message: 'hello world' });
   }));
 
-  localLambda.invoke({ FunctionName: 'hello', Payload: {} }, (err, result) => {
+  localLambda.invoke({ FunctionName: 'hello' }, (err, result) => {
     if (err) {
       fail(err);
     }
@@ -38,7 +38,7 @@ it('return values via return syntax', async (done) => {
     return { message: 'hello world' };
   }));
 
-  localLambda.invoke({ FunctionName: 'hello', Payload: {} }, (err, result) => {
+  localLambda.invoke({ FunctionName: 'hello'}, (err, result) => {
     if (err) {
       fail(err);
     }
@@ -59,7 +59,7 @@ it('can handle event payload', async (done) => {
 
   const Payload = {message: 'hello'}; // tslint:disable-line
 
-  localLambda.invoke({ FunctionName: 'hello', Payload}, (err, result) => {
+  localLambda.invoke({ FunctionName: 'hello', Payload: JSON.stringify(Payload)}, (err, result) => {
     if (err) {
       fail(err);
     }
@@ -79,7 +79,7 @@ it('return error as payload if lambda function return error via callback', async
     callback(new Error((event as any).errorMessage), null); // FIXME
   }));
 
-  localLambda.invoke({ FunctionName: 'hello', Payload: {errorMessage} }, (err, result) => {
+  localLambda.invoke({ FunctionName: 'hello', Payload: JSON.stringify({errorMessage}) }, (err, result) => {
     if (err) {
       fail(err);
     }
@@ -108,7 +108,7 @@ it('return error as payload if lambda function reject promise', async (done) => 
 
   const Payload = {errorMessage: 'error for test'}; // tslint:disable-line
 
-  localLambda.invoke({ FunctionName: 'hello', Payload}, (err, result) => {
+  localLambda.invoke({ FunctionName: 'hello', Payload: JSON.stringify(Payload)}, (err, result) => {
     if (err) {
       fail(err);
     }
@@ -124,7 +124,7 @@ it('return error as payload if lambda function reject promise', async (done) => 
 it('return error if invoke nonexistent function', (done) => {
   const localLambda = new LocalLambda();
 
-  localLambda.invoke({ FunctionName: 'nonexistent', Payload: {}}, (err) => {
+  localLambda.invoke({ FunctionName: 'nonexistent' }, (err) => {
     if (!err) {
       fail('nonexistent function invoking must return ResourceNotFoundException');
       done();

@@ -3,7 +3,7 @@ import * as Lambda from 'aws-sdk/clients/lambda';
 
 export interface IInvokeParams {
   FunctionName: string;
-  Payload: object;
+  Payload?: string;
 }
 
 export interface IContext {
