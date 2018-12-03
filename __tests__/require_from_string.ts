@@ -1,5 +1,6 @@
-import { requireFromString } from '../src/lamool';
-import { LocalLambda } from '../src/local_lambda';
+import { requireFromString } from '../src';
+import { LocalLambda } from '../src';
+import { funcToZip } from '../src/util';
 
 it('requireFromString: exports', () => {
   const exports = requireFromString('exports.handler = (a) => {return a+a;}');
@@ -13,14 +14,13 @@ it('requireFromString: module.exports', () => {
   expect(handler(3)).toBe(6);
 });
 
-it('fetch function from requireFromString and pass to LocalLambda', (done) => {
+it('fetch function from requireFromString and pass to LocalLambda', async (done) => {
   const localLambda = new LocalLambda();
   const {handler} = requireFromString(`module.exports.handler = (_e, _c, cb) => {cb(null, {message: 'hello world'})}`);
-  localLambda.createFunction({
-    Code: {},
-    FunctionBody: handler,
+  await localLambda.createFunction({
+    Code: {ZipFile: funcToZip(handler)},
     FunctionName: 'hello',
-    Handler: 'hoge.fuga',
+    Handler: 'index.handler',
     Role: '-',
     Runtime: 'nodejs8.10',
   });
