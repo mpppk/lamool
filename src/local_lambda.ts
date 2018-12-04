@@ -21,7 +21,7 @@ export class LocalLambda {
     this.pool = workerpool.pool();
   }
 
-  public async createFunction(params: CreateFunctionRequest, callback?: Callback<Types.FunctionConfiguration>) {
+  public createFunction(params: CreateFunctionRequest, callback?: Callback<Types.FunctionConfiguration>) {
     if (this.funcMap.has(params.FunctionName)) {
       // TODO throw exception
       return;
@@ -37,12 +37,13 @@ export class LocalLambda {
     }
 
     const [fileName, handlerName] = LocalLambda.parseHandler(params.Handler);
-    const functionBody = await zipToFunc(zipFile as Blob | Buffer, fileName, handlerName); // FIXME
-
-    this.funcMap.set(params.FunctionName, functionBody);
-    if (callback) {
-      callback(null, {FunctionName: params.FunctionName});
-    }
+    zipToFunc(zipFile as Blob | Buffer, fileName, handlerName)
+      .then((functionBody) => {
+        this.funcMap.set(params.FunctionName, functionBody);
+        if (callback) {
+          callback(null, {FunctionName: params.FunctionName});
+        }
+      });
   }
 
   public invoke(params: IInvokeParams, callback: InvokeCallback) {

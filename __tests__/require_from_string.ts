@@ -1,6 +1,7 @@
 import { requireFromString } from '../src';
 import { LocalLambda } from '../src';
 import { funcToZip } from '../src/util';
+import { createFunction } from './util/util';
 
 it('requireFromString: exports', () => {
   const exports = requireFromString('exports.handler = (a) => {return a+a;}');
@@ -17,7 +18,7 @@ it('requireFromString: module.exports', () => {
 it('fetch function from requireFromString and pass to LocalLambda', async (done) => {
   const localLambda = new LocalLambda();
   const {handler} = requireFromString(`module.exports.handler = (_e, _c, cb) => {cb(null, {message: 'hello world'})}`);
-  await localLambda.createFunction({
+  await createFunction(localLambda, {
     Code: {ZipFile: funcToZip(handler)},
     FunctionName: 'hello',
     Handler: 'index.handler',
