@@ -2,9 +2,10 @@ const Lamool = require('lamool');
 const AWS = require('aws-sdk');
 const Lambda = require('aws-sdk/clients/lambda');
 
-// AWS.config.region = 'us-east-1';
-// const lambda = new Lambda({ apiVersion: '2015-03-31' });
-const lambda = new Lamool.LocalLambda();
+AWS.config.region = 'us-east-1';
+let lambda = new Lambda({ apiVersion: '2015-03-31' });
+lambda = new Lamool.Lamool({lambda: lambda}); // lamool has AWS Lambda compatible API, so you can replace lambda instance to lamool
+// lambda = new Lamool.Lamool({lambda: lambda}); // If you does not pass lambda instance, lamool will execute lambda function only on browser
 
 (async () => {
   const funcZip = await Lamool.funcToZip((event, context, cb) => {
@@ -19,7 +20,6 @@ const lambda = new Lamool.LocalLambda();
     Role: 'arn:aws:iam::000000000000:role/SomeRole',
     Runtime: 'nodejs8.10',
   };
-
 
   const createFunction = () => {
     return new Promise((resolve, reject) => {
