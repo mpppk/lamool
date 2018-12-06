@@ -22,7 +22,7 @@ export const zipToFunc = async <T>(zipFile: Buffer | Blob, fileName: string, han
   return handlerFunc;
 };
 
-export const funcToZip = async <T>(func: LambdaFunction<T>, fileName = 'index.js', handlerName = 'handler') => {
+export const funcToZip = <T>(func: LambdaFunction<T>, fileName = 'index.js', handlerName = 'handler') => {
   const zip = new JSZip();
   zip.file(fileName, funcToModule(func, handlerName));
 
