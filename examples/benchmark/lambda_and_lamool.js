@@ -6,16 +6,20 @@ const createFunction = require('./util').createFunction;
 
 AWS.config.region = 'ap-northeast-1';
 // AWS.config.region = 'us-east-1';
-let lambda = new Lambda({ apiVersion: '2015-03-31' });
-lambda = new Lamool.Lamool({lambda: lambda}); // lamool has AWS Lambda compatible API, so you can replace lambda instance to lamool
-// let lambda = new Lamool.Lamool(); // lamool has AWS Lambda compatible API, so you can replace lambda instance to lamool
+// let lambda = new Lambda({ apiVersion: '2015-03-31' });
+// lambda = new Lamool.Lamool({
+//   lambda: lambda,
+//   workerPool: { minWorkers: 'max' }}); // lamool has AWS Lambda compatible API, so you can replace lambda instance to lamool
+let lambda = new Lamool.Lamool({workerPool: {minWorkers: 'max'}}); // lamool has AWS Lambda compatible API, so you can replace lambda instance to lamool
 
 const TEST_CASES = [
+  {fibNum: 1, loopNum: 1, tryNum: 3},
+  {fibNum: 1, loopNum: 5, tryNum: 3},
   {fibNum: 38, loopNum: 1, tryNum: 3},
-  {fibNum: 40, loopNum: 1, tryNum: 3},
   {fibNum: 38, loopNum: 5, tryNum: 3},
-  {fibNum: 40, loopNum: 5, tryNum: 3},
   {fibNum: 38, loopNum: 30, tryNum: 3},
+  {fibNum: 40, loopNum: 1, tryNum: 3},
+  {fibNum: 40, loopNum: 5, tryNum: 3},
   {fibNum: 40, loopNum: 30, tryNum: 3},
 ];
 

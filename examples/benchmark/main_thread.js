@@ -1,11 +1,13 @@
-const fib = require('./util').fib;
+const fib = (n) => n <= 1 ? n : fib(n-1)+fib(n-2);;
 
 const TEST_CASES = [
+  {fibNum: 1, loopNum: 1, tryNum: 3},
+  {fibNum: 1, loopNum: 5, tryNum: 3},
   {fibNum: 38, loopNum: 1, tryNum: 3},
-  {fibNum: 40, loopNum: 1, tryNum: 3},
   {fibNum: 38, loopNum: 5, tryNum: 3},
-  {fibNum: 40, loopNum: 5, tryNum: 3},
   {fibNum: 38, loopNum: 30, tryNum: 3},
+  {fibNum: 40, loopNum: 1, tryNum: 3},
+  {fibNum: 40, loopNum: 5, tryNum: 3},
   {fibNum: 40, loopNum: 30, tryNum: 3},
 ];
 
