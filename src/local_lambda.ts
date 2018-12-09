@@ -27,7 +27,11 @@ export class LocalLambda {
 
   public createFunction(params: CreateFunctionRequest, callback?: Callback<Types.FunctionConfiguration>) {
     if (this.funcMap.has(params.FunctionName)) {
-      // TODO throw exception
+      const err = new Error(`Function already exist: ${params.FunctionName}`);
+      err.name = 'ResourceConflictException';
+      if (callback) {
+        callback(err, null);
+      }
       return;
     }
 

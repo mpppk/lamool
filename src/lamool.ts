@@ -25,7 +25,7 @@ export class Lamool {
   }
 
   public static generatePrioritizeLocalStrategyFunc(allowPendingTaskNum: number): strategyFunc {
-    return (context: ILamoolContext): boolean => context.stats.pendingTasks < allowPendingTaskNum;
+    return (context: ILamoolContext): boolean => context.stats.pendingTasks <= allowPendingTaskNum;
   }
 
   private readonly lambda: Lambda | null = null;
@@ -36,7 +36,7 @@ export class Lamool {
     this.strategy = Lamool.alwaysRunLocal;
     if (opt && opt.lambda) {
       this.lambda = opt.lambda;
-      this.strategy = Lamool.generatePrioritizeLocalStrategyFunc(3);
+      this.strategy = Lamool.generatePrioritizeLocalStrategyFunc(0);
     }
 
     if (opt && opt.strategy) {
@@ -47,15 +47,21 @@ export class Lamool {
   }
 
   public createFunction(params: CreateFunctionRequest, callback?: Callback<Types.FunctionConfiguration>) {
-    if (this.lambda) {
-      try {
-        this.createFunctionOnLambda(params, callback);
-      } catch (e) {
-        // FIXME
-        console.log(e); // tslint:disable-line
+    const internalCallback: Callback<Types.FunctionConfiguration> = (err, result) => {
+      if (err && callback) {
+        callback(err, result);
       }
-    }
-    this.localLambda.createFunction(params, callback);
+
+      if (!this.lambda) {
+        if (callback) {
+          callback(err, result);
+        }
+        return;
+      }
+      this.createFunctionOnLambda(params, callback);
+    };
+
+    this.localLambda.createFunction(params, internalCallback);
   }
 
   public invoke(params: IInvokeParams, callback: InvokeCallback) {
