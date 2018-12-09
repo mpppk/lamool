@@ -3,7 +3,7 @@ import { LocalLambda } from '../src';
 import { LambdaFunction } from '../src/lambda';
 import { funcToZip } from '../src/util';
 import { createFunction } from './util/util';
-
+jest.setTimeout(10000);
 const generateCreateFunctionRequest = <T>(name: string, handler: LambdaFunction<T>): CreateFunctionRequest => { // tslint:disable-line
    return {
      Code: {ZipFile: funcToZip(handler)},
@@ -25,8 +25,14 @@ it('return values via callback', async (done) => {
     if (err) {
       fail(err);
     }
-    if (!result || !result.Payload) {
-      fail('payload does not exist');
+    if (!result) {
+      fail('result does not returned');
+    }
+    if (result!.FunctionError === 'Handled') {
+      fail('function error is handled: ' + result!.Payload);
+    }
+    if (!result!.Payload) {
+      fail('payload does not exist: ' + result ? JSON.stringify(result!) : '');
     }
     const payload = JSON.parse(result!.Payload as string);
     expect(payload.message).toBe('hello world');
