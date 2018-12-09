@@ -1,7 +1,7 @@
 import { AWSError } from 'aws-sdk';
 import { CreateFunctionRequest, InvocationResponse, Types } from 'aws-sdk/clients/lambda';
 import * as workerpool from 'workerpool';
-import { WorkerPool, WorkerPoolStats } from 'workerpool';
+import { WorkerPool, WorkerPoolOptions, WorkerPoolStats } from 'workerpool';
 import { Callback, IContext, IInvokeParams, InvokeCallback, LambdaFunction } from './lambda';
 import { zipToFunc } from './util';
 
@@ -17,8 +17,8 @@ export class LocalLambda {
   private funcMap = new Map<string, LambdaFunction<any>>();
   private readonly pool: WorkerPool;
 
-  constructor() {
-    this.pool = workerpool.pool();
+  constructor(opt?: WorkerPoolOptions) {
+    this.pool = workerpool.pool(undefined, opt);
   }
 
   public stats(): WorkerPoolStats {

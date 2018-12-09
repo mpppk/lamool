@@ -1,6 +1,6 @@
 import { CreateFunctionRequest, InvocationRequest, Types } from 'aws-sdk/clients/lambda';
 import * as Lambda from 'aws-sdk/clients/lambda';
-import { WorkerPoolStats } from 'workerpool';
+import { WorkerPoolOptions, WorkerPoolStats } from 'workerpool';
 import { Callback, IInvokeParams, InvokeCallback } from './lambda';
 import { LocalLambda } from './local_lambda';
 
@@ -13,6 +13,7 @@ type strategyFunc = (context: ILamoolContext) => boolean;
 export interface ILamoolOption {
   lambda: Lambda;
   strategy: strategyFunc;
+  workerPool: WorkerPoolOptions;
 }
 
 export class Lamool {
@@ -43,7 +44,8 @@ export class Lamool {
       this.strategy = opt.strategy;
     }
 
-    this.localLambda = new LocalLambda();
+    const workerPoolOpt = opt ? opt.workerPool : undefined;
+    this.localLambda = new LocalLambda(workerPoolOpt);
   }
 
   public createFunction(params: CreateFunctionRequest, callback?: Callback<Types.FunctionConfiguration>) {
