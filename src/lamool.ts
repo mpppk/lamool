@@ -1,37 +1,77 @@
 import { CreateFunctionRequest, InvocationRequest, Types } from 'aws-sdk/clients/lambda';
 import * as Lambda from 'aws-sdk/clients/lambda';
+import { WorkerPoolOptions, WorkerPoolStats } from 'workerpool';
 import { Callback, IInvokeParams, InvokeCallback } from './lambda';
 import { LocalLambda } from './local_lambda';
 
+export interface ILamoolContext {
+  stats: WorkerPoolStats;
+}
+
+type strategyFunc = (context: ILamoolContext) => boolean;
+
 export interface ILamoolOption {
   lambda: Lambda;
+  strategy: strategyFunc;
+  workerPool: WorkerPoolOptions;
 }
 
 export class Lamool {
+  public static alwaysRunLocal(_: ILamoolContext): boolean {
+    return true;
+  }
+
+  public static alwaysRunAWSLambda(_: ILamoolContext): boolean {
+    return false;
+  }
+
+  public static generatePrioritizeLocalStrategyFunc(allowPendingTaskNum: number): strategyFunc {
+    return (context: ILamoolContext): boolean => context.stats.pendingTasks <= allowPendingTaskNum;
+  }
+
   private readonly lambda: Lambda | null = null;
   private readonly localLambda: LocalLambda;
+  private readonly strategy: strategyFunc;
 
   constructor(opt?: Partial<ILamoolOption>) {
+    this.strategy = Lamool.alwaysRunLocal;
     if (opt && opt.lambda) {
       this.lambda = opt.lambda;
+      this.strategy = Lamool.generatePrioritizeLocalStrategyFunc(0);
     }
-    this.localLambda = new LocalLambda();
+
+    if (opt && opt.strategy) {
+      this.strategy = opt.strategy;
+    }
+
+    const workerPoolOpt = opt ? opt.workerPool : undefined;
+    this.localLambda = new LocalLambda(workerPoolOpt);
   }
 
   public createFunction(params: CreateFunctionRequest, callback?: Callback<Types.FunctionConfiguration>) {
-    if (this.lambda) {
+    const internalCallback: Callback<Types.FunctionConfiguration> = (err, result) => {
+      if (err && callback) {
+        callback(err, result);
+      }
+
+      if (!this.lambda) {
+        if (callback) {
+          callback(err, result);
+        }
+        return;
+      }
       this.createFunctionOnLambda(params, callback);
-      return;
-    }
-    this.localLambda.createFunction(params, callback);
+    };
+
+    this.localLambda.createFunction(params, internalCallback);
   }
 
   public invoke(params: IInvokeParams, callback: InvokeCallback) {
-    if (this.lambda) {
-      this.invokeOnLambda(params, callback);
+    if (this.checkFunctionShouldBeRunLocal()) {
+      this.localLambda.invoke(params, callback);
       return;
     }
-    this.localLambda.invoke(params, callback);
+    this.invokeOnLambda(params, callback);
   }
 
   private createFunctionOnLambda(params: CreateFunctionRequest, callback?: Callback<Types.FunctionConfiguration>) {
@@ -46,6 +86,13 @@ export class Lamool {
       throw new Error('lambda is not available');
     }
     this.lambda.invoke(params, callback);
+  }
+
+  private checkFunctionShouldBeRunLocal(): boolean {
+    if (!this.lambda) {
+      return true;
+    }
+    return this.strategy({stats: this.localLambda.stats()});
   }
 }
 

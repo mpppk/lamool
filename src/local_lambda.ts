@@ -1,7 +1,7 @@
 import { AWSError } from 'aws-sdk';
 import { CreateFunctionRequest, InvocationResponse, Types } from 'aws-sdk/clients/lambda';
 import * as workerpool from 'workerpool';
-import { WorkerPool } from 'workerpool';
+import { WorkerPool, WorkerPoolOptions, WorkerPoolStats } from 'workerpool';
 import { Callback, IContext, IInvokeParams, InvokeCallback, LambdaFunction } from './lambda';
 import { zipToFunc } from './util';
 
@@ -17,13 +17,21 @@ export class LocalLambda {
   private funcMap = new Map<string, LambdaFunction<any>>();
   private readonly pool: WorkerPool;
 
-  constructor() {
-    this.pool = workerpool.pool();
+  constructor(opt?: WorkerPoolOptions) {
+    this.pool = workerpool.pool(undefined, opt);
+  }
+
+  public stats(): WorkerPoolStats {
+    return this.pool.stats();
   }
 
   public createFunction(params: CreateFunctionRequest, callback?: Callback<Types.FunctionConfiguration>) {
     if (this.funcMap.has(params.FunctionName)) {
-      // TODO throw exception
+      const err = new Error(`Function already exist: ${params.FunctionName}`);
+      err.name = 'ResourceConflictException';
+      if (callback) {
+        callback(err, null);
+      }
       return;
     }
 
@@ -39,7 +47,9 @@ export class LocalLambda {
     const [fileName, handlerName] = LocalLambda.parseHandler(params.Handler);
     zipToFunc(zipFile as Blob | Buffer, fileName, handlerName)
       .then((functionBody) => {
-        this.funcMap.set(params.FunctionName, functionBody);
+        const f = generateWrappedLambdaFunc(functionBody);
+        this.funcMap.set(params.FunctionName, f);
+
         if (callback) {
           callback(null, {FunctionName: params.FunctionName});
         }
@@ -53,28 +63,6 @@ export class LocalLambda {
       callback(generateResourceNotFoundException(), null);
       return;
     }
-    const func = this.funcMap.get(params.FunctionName)!;
-
-    const wrappedFunc = (funcStr: string, event: object, context: IContext): Promise<any> => {
-      const f: LambdaFunction<any> = new Function('return ' + funcStr)();
-      return new Promise((resolve, reject) => {
-        try {
-          // TODO: Implement timeout
-          const result = f(event, context, (err, res) => {
-            if (err) {
-              reject(err);
-            }
-            resolve(res);
-          });
-          if (result) {
-            resolve(result);
-          }
-        } catch (e) {
-          reject(e);
-        }
-      });
-    };
-
     let payload = {};
     if (params.Payload) {
       try {
@@ -84,8 +72,9 @@ export class LocalLambda {
       }
     }
 
+    console.time('workerpool'); // tslint:disable-line
     this.pool
-      .exec(wrappedFunc, [func.toString(), payload, { functionName: params.FunctionName }])
+      .exec(this.funcMap.get(params.FunctionName)!, [payload, { functionName: params.FunctionName }])
       .then(results => callback(null, toInvocationResponse(results)),
           err => callback(null, toFailedInvocationResponse(err)));
   }
@@ -112,6 +101,21 @@ const toAWSError = (err: Error): Partial<AWSError> => {
     statusCode: 404,
     time: new Date(),
   };
+};
+
+const generateWrappedLambdaFunc = <T>(f: LambdaFunction<T>): (event: object, context: IContext) => Promise<any> => {
+  return Function('event', 'context', `
+    const f = ${f.toString()};
+    return new Promise((resolve, reject) => {
+      try {
+        const result = f(event, context, (err, res) => {
+          if (err) { reject(err); return; }
+          resolve(res); return;
+        });
+        if (result) { resolve(result); return; }
+      } catch (e) { reject(e); }
+    });
+  `) as (event: object, context: IContext) => Promise<any>;
 };
 
 const generateResourceNotFoundException = (): AWSError => {
@@ -151,3 +155,4 @@ const toPayloadError = (err: Error): IPayloadError => {
     stackTrace: _stack,
   };
 };
+
