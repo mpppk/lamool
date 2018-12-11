@@ -25,6 +25,10 @@ export class LocalLambda {
     return this.pool.stats();
   }
 
+  public terminate(force?: boolean, timeout?: number): workerpool.Promise<any[]> {
+    return this.pool.terminate(force, timeout);
+  }
+
   public createFunction(params: CreateFunctionRequest, callback?: Callback<Types.FunctionConfiguration>) {
     if (this.funcMap.has(params.FunctionName)) {
       const err = new Error(`Function already exist: ${params.FunctionName}`);
