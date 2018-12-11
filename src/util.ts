@@ -4,7 +4,7 @@ import { requireFromString } from './lamool';
 
 export const isNode = (typeof process !== "undefined" && typeof require !== "undefined");
 
-export const zipToFunc = async <T>(zipFile: Buffer | Blob, fileName: string, handlerName: string): Promise<LambdaFunction<T>> => {
+export const zipToFunc = async <T, U>(zipFile: Buffer | Blob, fileName: string, handlerName: string): Promise<LambdaFunction<T, U>> => {
   const zip = await JSZip.loadAsync(zipFile);
   const file = await zip.file(fileName);
 
@@ -22,7 +22,7 @@ export const zipToFunc = async <T>(zipFile: Buffer | Blob, fileName: string, han
   return handlerFunc;
 };
 
-export const funcToZip = <T>(func: LambdaFunction<T>, fileName = 'index.js', handlerName = 'handler') => {
+export const funcToZip = <T, U>(func: LambdaFunction<T, U>, fileName = 'index.js', handlerName = 'handler') => {
   const zip = new JSZip();
   zip.file(fileName, funcToModule(func, handlerName));
 
@@ -35,6 +35,6 @@ export const funcToZip = <T>(func: LambdaFunction<T>, fileName = 'index.js', han
   });
 };
 
-const funcToModule = <T>(func: LambdaFunction<T>, handlerName = 'handler') => {
+const funcToModule = <T, U>(func: LambdaFunction<T, U>, handlerName = 'handler') => {
   return `module.exports.${handlerName} = ${func.toString()}`;
 };
