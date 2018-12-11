@@ -14,7 +14,7 @@ export class LocalLambda {
     return [fileAndHandlerName[0] + '.js', fileAndHandlerName[1]]
   }
 
-  private funcMap = new Map<string, LambdaFunction<any>>();
+  private funcMap = new Map<string, LambdaFunction<any, any>>();
   private readonly pool: WorkerPool;
 
   constructor(opt?: WorkerPoolOptions) {
@@ -103,7 +103,7 @@ const toAWSError = (err: Error): Partial<AWSError> => {
   };
 };
 
-const generateWrappedLambdaFunc = <T>(f: LambdaFunction<T>): (event: object, context: IContext) => Promise<any> => {
+const generateWrappedLambdaFunc = <T, U>(f: LambdaFunction<T, U>): (event: object, context: IContext) => Promise<any> => {
   return Function('event', 'context', `
     const f = ${f.toString()};
     return new Promise((resolve, reject) => {
