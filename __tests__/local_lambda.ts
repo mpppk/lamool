@@ -4,7 +4,7 @@ import { LambdaFunction } from '../src/lambda';
 import { funcToZip } from '../src/util';
 import { createFunction } from './util/util';
 jest.setTimeout(10000);
-const generateCreateFunctionRequest = <T>(name: string, handler: LambdaFunction<T>): CreateFunctionRequest => { // tslint:disable-line
+const generateCreateFunctionRequest = <T, U>(name: string, handler: LambdaFunction<T, U>): CreateFunctionRequest => { // tslint:disable-line
    return {
      Code: {ZipFile: funcToZip(handler)},
      FunctionName: name,
