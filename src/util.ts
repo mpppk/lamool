@@ -1,10 +1,10 @@
 import * as JSZip from 'jszip';
-import { LambdaFunction } from './lambda';
+import { IPayload, LambdaFunction } from './lambda';
 import { requireFromString } from './lamool';
 
 export const isNode = (typeof process !== "undefined" && typeof require !== "undefined");
 
-export const zipToFunc = async <T, U>(zipFile: Buffer | Blob, fileName: string, handlerName: string): Promise<LambdaFunction<T, U>> => {
+export const zipToFunc = async <T = IPayload, U = T>(zipFile: Buffer | Blob, fileName: string, handlerName: string): Promise<LambdaFunction<T, U>> => {
   const zip = await JSZip.loadAsync(zipFile);
   const file = await zip.file(fileName);
 
@@ -22,7 +22,7 @@ export const zipToFunc = async <T, U>(zipFile: Buffer | Blob, fileName: string, 
   return handlerFunc;
 };
 
-export const funcToZip = <T, U>(func: LambdaFunction<T, U>, fileName = 'index.js', handlerName = 'handler') => {
+export const funcToZip = <T = IPayload, U = T>(func: LambdaFunction<T, U>, fileName = 'index.js', handlerName = 'handler') => {
   const zip = new JSZip();
   zip.file(fileName, funcToModule(func, handlerName));
 
