@@ -5,7 +5,7 @@
      * nodejs (child_process)
      * browser (Web worker)
      * fallback to main thread
-* Offload workloads to AWS lambda
+* Offload workloads to AWS Lambda
 * AWS Lambda SDK API compatible
 
 ## Benefits 
@@ -33,8 +33,7 @@ const lambda = new Lamool();
 
 // const lambda = new Lamool(new Lambda({ apiVersion: '2015-03-31' }));
 /** ↑ You can pass AWS Lambda instance to Lamool constructor
- * to offload functions to AWS Lambda according to user defined strategy 
- * */
+ * to offload functions to AWS Lambda according to user defined strategy */
 
 (async () => {
   // This is a function according to AWS Lambda signature
@@ -48,7 +47,7 @@ const lambda = new Lamool();
     FunctionName, // The name of the Lambda function
     Handler: 'index.handler', // The name of the method within your code that Lambda calls to execute your function
     // If you upload function via funcToZip, Handler must be 'index.handler'
-    Role: 'arn:aws:iam::000000000000:role/SomeRole',
+    Role: 'arn:aws:iam::000000000000:role/SomeRole', // The Amazon Resource Name (ARN) of the function's execution role.
     Runtime: 'nodejs8.10', // The runtime version for the function
   };
 
