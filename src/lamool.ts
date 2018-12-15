@@ -1,6 +1,7 @@
 import { CreateFunctionRequest, InvocationRequest, Types } from 'aws-sdk/clients/lambda';
 import * as Lambda from 'aws-sdk/clients/lambda';
 import { WorkerPoolOptions, WorkerPoolStats } from 'workerpool';
+import * as workerpool from 'workerpool';
 import { Callback, IInvokeParams, InvokeCallback } from './lambda';
 import { LocalLambda } from './local_lambda';
 
@@ -72,6 +73,10 @@ export class Lamool {
       return;
     }
     this.invokeOnLambda(params, callback);
+  }
+
+  public terminate(force?: boolean, timeout?: number): workerpool.Promise<any[]> {
+    return this.localLambda.terminate(force, timeout);
   }
 
   private createFunctionOnLambda(params: CreateFunctionRequest, callback?: Callback<Types.FunctionConfiguration>) {
