@@ -76,7 +76,6 @@ export class LocalLambda {
       }
     }
 
-    console.time('workerpool'); // tslint:disable-line
     this.pool
       .exec(this.funcMap.get(params.FunctionName)!, [payload, { functionName: params.FunctionName }])
       .then(results => callback(null, toInvocationResponse(results)),
