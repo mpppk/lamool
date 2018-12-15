@@ -2,7 +2,7 @@ import { AWSError } from 'aws-sdk';
 import { CreateFunctionRequest, InvocationResponse, Types } from 'aws-sdk/clients/lambda';
 import * as workerpool from 'workerpool';
 import { WorkerPool, WorkerPoolOptions, WorkerPoolStats } from 'workerpool';
-import { Callback, IContext, IInvokeParams, InvokeCallback, LambdaFunction } from './lambda';
+import { Callback, IContext, IInvokeParams, InvokeCallback, IPayload, LambdaFunction } from './lambda';
 import { zipToFunc } from './util';
 
 export class LocalLambda {
@@ -14,7 +14,7 @@ export class LocalLambda {
     return [fileAndHandlerName[0] + '.js', fileAndHandlerName[1]]
   }
 
-  private funcMap = new Map<string, LambdaFunction<any, any>>();
+  private funcMap = new Map<string, LambdaFunction<IPayload, any>>();
   private readonly pool: WorkerPool;
 
   constructor(opt?: WorkerPoolOptions) {
@@ -107,7 +107,7 @@ const toAWSError = (err: Error): Partial<AWSError> => {
   };
 };
 
-const generateWrappedLambdaFunc = <T, U>(f: LambdaFunction<T, U>): (event: object, context: IContext) => Promise<any> => {
+const generateWrappedLambdaFunc = <T, U>(f: LambdaFunction<T, U>): (event: IPayload, context: IContext) => Promise<U> => {
   return Function('event', 'context', `
     const f = ${f.toString()};
     return new Promise((resolve, reject) => {
@@ -119,7 +119,7 @@ const generateWrappedLambdaFunc = <T, U>(f: LambdaFunction<T, U>): (event: objec
         if (result) { resolve(result); return; }
       } catch (e) { reject(e); }
     });
-  `) as (event: object, context: IContext) => Promise<any>;
+  `) as (event: object, context: IContext) => Promise<U>;
 };
 
 const generateResourceNotFoundException = (): AWSError => {
@@ -128,7 +128,7 @@ const generateResourceNotFoundException = (): AWSError => {
   return toAWSError(err) as AWSError;
 };
 
-const toInvocationResponse = (data: any): InvocationResponse => {
+const toInvocationResponse = (data: IPayload): InvocationResponse => {
   const res: InvocationResponse = {StatusCode: 200};
   if (data) {
     res.Payload = JSON.stringify(data);
