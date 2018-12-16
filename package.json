@@ -1,7 +1,7 @@
 {
   "name": "lamool",
   "version": "0.0.1",
-  "description": "",
+  "description": "Universal AWS Lambda runtime",
   "main": "src/index.js",
   "scripts": {
     "build": "tsc",
@@ -16,7 +16,8 @@
     "precommit": "pretty-quick --staged"
   },
   "files": [
-    "src/lamool.js"
+    "src/*.js",
+    "src/*.ts"
   ],
   "types": "src/index.d.ts",
   "jest": {
@@ -40,7 +41,7 @@
     "collectCoverage": false,
     "testEnvironment": "node"
   },
-  "keywords": [],
+  "keywords": ["amazon", "aws", "lambda", "universal", "isomorphic", "web worker", "worker"],
   "author": "mpppk",
   "license": "MIT",
   "devDependencies": {
