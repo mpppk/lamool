@@ -20,27 +20,6 @@
     "src/*.ts"
   ],
   "types": "src/index.d.ts",
-  "jest": {
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "transform": {
-      "^.+\\.(ts|tsx)$": "ts-jest"
-    },
-    "globals": {
-      "ts-jest": {
-        "tsConfigFile": "tsconfig.json"
-      }
-    },
-    "testMatch": [
-      "**/__tests__/*.+(ts|tsx)"
-    ],
-    "coverageDirectory": "./coverage/",
-    "collectCoverage": false,
-    "testEnvironment": "node"
-  },
   "keywords": ["amazon", "aws", "lambda", "universal", "isomorphic", "web worker", "worker"],
   "author": "mpppk",
   "license": "MIT",
