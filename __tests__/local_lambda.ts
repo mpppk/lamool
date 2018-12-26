@@ -1,16 +1,18 @@
 import { CreateFunctionRequest } from 'aws-sdk/clients/lambda';
+import { promisify } from 'util';
 import { LocalLambda } from '../src';
 import { LambdaFunction } from '../src/lambda';
 import { funcToZip } from '../src/util';
 import { createFunction } from './util/util';
 jest.setTimeout(10000);
-const generateCreateFunctionRequest = <T, U>(name: string, handler: LambdaFunction<T, U>): CreateFunctionRequest => { // tslint:disable-line
-   return {
-     Code: {ZipFile: funcToZip(handler)},
-     FunctionName: name,
-     Handler: 'index.handler',
-     Role: '-',
-     Runtime: 'nodejs8.10',
+const generateCreateFunctionRequest = <T, U>(name: string, handler: LambdaFunction<T, U>): CreateFunctionRequest => {
+  // tslint:disable-line
+  return {
+    Code: { ZipFile: funcToZip(handler) },
+    FunctionName: name,
+    Handler: 'index.handler',
+    Role: '-',
+    Runtime: 'nodejs8.10'
   };
 };
 
@@ -25,10 +27,13 @@ describe('local lambda', () => {
     await localLambda.terminate(true);
   });
 
-  it('return values via callback', async (done) => {
-    await createFunction(localLambda, generateCreateFunctionRequest('hello', (_event, _context, callback) => {
-      callback(null, { message: 'hello world' });
-    }));
+  it('return values via callback', async done => {
+    await createFunction(
+      localLambda,
+      generateCreateFunctionRequest('hello', (_event, _context, callback) => {
+        callback(null, { message: 'hello world' });
+      })
+    );
 
     localLambda.invoke({ FunctionName: 'hello' }, (err, result) => {
       if (err) {
@@ -49,12 +54,15 @@ describe('local lambda', () => {
     });
   });
 
-  it('return values via return syntax', async (done) => {
-    await createFunction(localLambda, generateCreateFunctionRequest('hello', () => {
-      return { message: 'hello world' };
-    }));
+  it('return values via return syntax', async done => {
+    await createFunction(
+      localLambda,
+      generateCreateFunctionRequest('hello', () => {
+        return { message: 'hello world' };
+      })
+    );
 
-    localLambda.invoke({ FunctionName: 'hello'}, (err, result) => {
+    localLambda.invoke({ FunctionName: 'hello' }, (err, result) => {
       if (err) {
         fail(err);
       }
@@ -67,14 +75,17 @@ describe('local lambda', () => {
     });
   });
 
-  it('can handle event payload', async (done) => {
-    await createFunction(localLambda, generateCreateFunctionRequest('hello', (event, _context, callback) => {
-      callback(null, { message: (event as any).message });
-    }));
+  it('can handle event payload', async done => {
+    await createFunction(
+      localLambda,
+      generateCreateFunctionRequest('hello', (event, _context, callback) => {
+        callback(null, { message: (event as any).message });
+      })
+    );
 
-    const Payload = {message: 'hello'}; // tslint:disable-line
+    const Payload = { message: 'hello' }; // tslint:disable-line
 
-    localLambda.invoke({ FunctionName: 'hello', Payload: JSON.stringify(Payload)}, (err, result) => {
+    localLambda.invoke({ FunctionName: 'hello', Payload: JSON.stringify(Payload) }, (err, result) => {
       if (err) {
         fail(err);
       }
@@ -87,13 +98,16 @@ describe('local lambda', () => {
     });
   });
 
-  it('return error as payload if lambda function return error via callback', async (done) => {
+  it('return error as payload if lambda function return error via callback', async done => {
     const errorMessage = 'error for test';
-    await createFunction(localLambda, generateCreateFunctionRequest('hello', (event, _context, callback) => {
-      callback(new Error((event as any).errorMessage), null); // FIXME
-    }));
+    await createFunction(
+      localLambda,
+      generateCreateFunctionRequest('hello', (event, _context, callback) => {
+        callback(new Error((event as any).errorMessage), null); // FIXME
+      })
+    );
 
-    localLambda.invoke({ FunctionName: 'hello', Payload: JSON.stringify({errorMessage}) }, (err, result) => {
+    localLambda.invoke({ FunctionName: 'hello', Payload: JSON.stringify({ errorMessage }) }, (err, result) => {
       if (err) {
         fail(err);
       }
@@ -107,20 +121,23 @@ describe('local lambda', () => {
         expect(payload.errorType).toBe('Error');
         expect(payload.errorMessage).toBe(errorMessage);
         done();
-      } catch(e) {
+      } catch (e) {
         fail(e);
         done();
       }
     });
   });
 
-  it('return error as payload if lambda function reject promise', async (done) => {
-    await createFunction(localLambda, generateCreateFunctionRequest('hello', (event) => {
-      throw new Error((event as any).errorMessage);
-    }));
-    const Payload = {errorMessage: 'error for test'}; // tslint:disable-line
+  it('return error as payload if lambda function reject promise', async done => {
+    await createFunction(
+      localLambda,
+      generateCreateFunctionRequest('hello', event => {
+        throw new Error((event as any).errorMessage);
+      })
+    );
+    const Payload = { errorMessage: 'error for test' }; // tslint:disable-line
 
-    localLambda.invoke({ FunctionName: 'hello', Payload: JSON.stringify(Payload)}, (err, result) => {
+    localLambda.invoke({ FunctionName: 'hello', Payload: JSON.stringify(Payload) }, (err, result) => {
       if (err) {
         fail(err);
       }
@@ -133,8 +150,8 @@ describe('local lambda', () => {
     });
   });
 
-  it('return error if invoke nonexistent function', (done) => {
-    localLambda.invoke({ FunctionName: 'nonexistent' }, (err) => {
+  it('return error if invoke nonexistent function', done => {
+    localLambda.invoke({ FunctionName: 'nonexistent' }, err => {
       if (!err) {
         fail('nonexistent function invoking must return ResourceNotFoundException');
         done();
@@ -149,9 +166,32 @@ describe('local lambda', () => {
   it('validate handler', async () => {
     const createFunctionRequest: CreateFunctionRequest = {
       ...generateCreateFunctionRequest('handler validation test', () => {}), // tslint:disable-line
-      Handler: undefined as any,
+      Handler: undefined as any
     };
     await expect(createFunction(localLambda, createFunctionRequest)).rejects.toThrow('Handler must be specified'); // FIXME message undefined
   });
-});
 
+  it('can list functions', async () => {
+    const listFunctions = promisify(localLambda.listFunctions.bind(localLambda));
+    const results = await listFunctions({});
+    if (!results) {
+      fail(`unexpected listFunctions result: ${results}`);
+    }
+    expect(results!.Functions).toHaveLength(0);
+
+    const functionName = 'listFunctionTest';
+    // tslint:disable-next-line
+    await createFunction(localLambda, generateCreateFunctionRequest(functionName, () => {}));
+    const results2 = await listFunctions({});
+    if (!results2) {
+      fail(`unexpected listFunctions result: ${results2}`);
+    }
+    expect(results2!.Functions).toHaveLength(1);
+
+    if (!results2!.Functions) {
+      fail(`Functions does not exist: ${results2!.Functions}`);
+    }
+
+    expect(results2!.Functions![0].FunctionName).toBe(functionName);
+  });
+});

@@ -1,8 +1,22 @@
 import { AWSError } from 'aws-sdk';
-import { CreateFunctionRequest, InvocationResponse, Types } from 'aws-sdk/clients/lambda';
+import {
+  CreateFunctionRequest,
+  FunctionConfiguration,
+  InvocationResponse,
+  ListFunctionsRequest,
+  Types
+} from 'aws-sdk/clients/lambda';
 import * as workerpool from 'workerpool';
 import { WorkerPool, WorkerPoolOptions, WorkerPoolStats } from 'workerpool';
-import { Callback, IContext, IInvokeParams, InvokeCallback, IPayload, LambdaFunction } from './lambda';
+import {
+  Callback,
+  IContext,
+  IInvokeParams,
+  InvokeCallback,
+  IPayload,
+  LambdaFunction,
+  ListFunctionsCallback
+} from './lambda';
 import { zipToFunc } from './util';
 
 export class LocalLambda {
@@ -84,6 +98,37 @@ export class LocalLambda {
       .exec(this.funcMap.get(params.FunctionName)!, [payload, { functionName: params.FunctionName }])
       .then(results => callback(null, toInvocationResponse(results)),
           err => callback(null, toFailedInvocationResponse(err)));
+  }
+
+  public listFunctions(_params: ListFunctionsRequest, callback: ListFunctionsCallback) {
+    // FIXME params is just ignored
+    // tslint:disable-next-line
+    const generateFunction = (FunctionName: string): FunctionConfiguration => {
+      return {
+        CodeSha256: 'xxxx', // FIXME
+        CodeSize: 0, // FIXME
+        Description: '',
+        FunctionArn: 'arn:aws:lambda:us-east-1:000000000000:function:callbackAndReturn',
+        FunctionName,
+        Handler: 'index.handler',
+        KMSKeyArn: undefined,
+        LastModified: '0000-00-00T00:00:00.000+0000',
+        MasterArn: undefined,
+        MemorySize: 128, // FIXME
+        RevisionId: 'c3057cae-8239-41c6-a8ca-47e0761a5594',
+        Role: 'arn:aws:iam::000000000000:role/xxxxx',
+        Runtime: 'nodejs8.10',
+        Timeout: 3, // FIXME
+        TracingConfig: undefined,
+        Version: '$LATEST',
+      }
+    };
+
+    const Functions = Array.from(this.funcMap.keys()).map(generateFunction); // tslint:disable-line
+    callback(null, {
+      Functions,
+      NextMarker: '',
+    });
   }
 
   public hasAvailableWorker(): boolean {

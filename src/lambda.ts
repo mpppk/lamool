@@ -12,6 +12,7 @@ export interface IContext {
 
 export type Callback<T = IPayload> = (error: Error | null, result: T | null) => void;
 export type InvokeCallback = (err: AWSError | null, data: Lambda.Types.InvocationResponse | null) => void;
+export type ListFunctionsCallback = (err: AWSError | null, data: Lambda.Types.ListFunctionsResponse | null) => void;
 export type LambdaFunction<T = IPayload, U = T> = (event: T, context: IContext, callback: Callback<U>) => void;
 export interface IPayload {[key: string]: any}
 
