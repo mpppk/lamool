@@ -145,5 +145,13 @@ describe('local lambda', () => {
       done();
     });
   });
+
+  it('validate handler', async () => {
+    const createFunctionRequest: CreateFunctionRequest = {
+      ...generateCreateFunctionRequest('handler validation test', () => {}), // tslint:disable-line
+      Handler: undefined as any,
+    };
+    await expect(createFunction(localLambda, createFunctionRequest)).rejects.toThrow('Handler must be specified'); // FIXME message undefined
+  });
 });
 
