@@ -7,6 +7,10 @@ import { zipToFunc } from './util';
 
 export class LocalLambda {
   private static parseHandler(handler: string): [string, string] {
+    if (!handler) {
+      throw new Error('Handler must be specified');
+    }
+
     const fileAndHandlerName = handler.split('.');
     if (fileAndHandlerName.length !== 2) {
       throw new Error('invalid Handler: ' + handler);
