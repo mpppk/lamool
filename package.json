@@ -13,7 +13,8 @@
     "doc": "typedoc --out ./docs -m \"umd\"",
     "lint": "npm run pretty-quick && tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx' 'test/**/*.ts' --fix",
     "pretty-quick": "pretty-quick",
-    "precommit": "pretty-quick --staged"
+    "precommit": "pretty-quick --staged",
+    "prepublish": "npm run clean && npm run build"
   },
   "files": [
     "src/*.js",
