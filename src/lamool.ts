@@ -1,8 +1,8 @@
-import { CreateFunctionRequest, InvocationRequest, Types } from 'aws-sdk/clients/lambda';
+import { CreateFunctionRequest, InvocationRequest, ListFunctionsRequest, Types } from 'aws-sdk/clients/lambda';
 import * as Lambda from 'aws-sdk/clients/lambda';
 import { WorkerPoolOptions, WorkerPoolStats } from 'workerpool';
 import * as workerpool from 'workerpool';
-import { Callback, IInvokeParams, InvokeCallback } from './lambda';
+import { Callback, IInvokeParams, InvokeCallback, ListFunctionsCallback } from './lambda';
 import { LocalLambda } from './local_lambda';
 
 export interface ILamoolContext {
@@ -73,6 +73,19 @@ export class Lamool {
       return;
     }
     this.invokeOnLambda(params, callback);
+  }
+
+  public listFunctions(params: ListFunctionsRequest, callback: ListFunctionsCallback) {
+    if (this.checkFunctionShouldBeRunLocal()) {
+      this.localLambda.listFunctions(params, callback);
+      return;
+    }
+
+    if (!this.lambda) {
+      throw new Error('lambda is not available');
+    }
+
+    this.lambda.listFunctions(params, callback);
   }
 
   public terminate(force?: boolean, timeout?: number): workerpool.Promise<any[]> {
