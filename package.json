@@ -14,7 +14,7 @@
     "lint": "npm run pretty-quick && tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx' 'test/**/*.ts' --fix",
     "pretty-quick": "pretty-quick",
     "precommit": "pretty-quick --staged",
-    "prepublishOnly": "npm run clean && npm run build"
+    "prepare": "npm run clean && npm run build"
   },
   "files": [
     "src/*.js",
