@@ -1,6 +1,6 @@
 {
   "name": "lamool",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Universal AWS Lambda runtime",
   "main": "src/index.js",
   "scripts": {
@@ -18,10 +18,18 @@
   },
   "files": [
     "src/*.js",
-    "src/*.ts"
+    "src/*.d.ts"
   ],
   "types": "src/index.d.ts",
-  "keywords": ["amazon", "aws", "lambda", "universal", "isomorphic", "web worker", "worker"],
+  "keywords": [
+    "amazon",
+    "aws",
+    "lambda",
+    "universal",
+    "isomorphic",
+    "web worker",
+    "worker"
+  ],
   "author": "mpppk",
   "license": "MIT",
   "devDependencies": {
