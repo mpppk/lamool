@@ -1,20 +1,8 @@
 import { CreateFunctionRequest } from 'aws-sdk/clients/lambda';
 import { promisify } from 'util';
 import { LocalLambda } from '../src';
-import { LambdaFunction } from '../src/lambda';
-import { funcToZip } from '../src/util';
-import { createFunction } from './util/util';
+import { createFunction, generateCreateFunctionRequest } from './util/util';
 jest.setTimeout(10000);
-const generateCreateFunctionRequest = <T, U>(name: string, handler: LambdaFunction<T, U>): CreateFunctionRequest => {
-  // tslint:disable-line
-  return {
-    Code: { ZipFile: funcToZip(handler) },
-    FunctionName: name,
-    Handler: 'index.handler',
-    Role: '-',
-    Runtime: 'nodejs8.10'
-  };
-};
 
 describe('local lambda', () => {
   let localLambda: LocalLambda;

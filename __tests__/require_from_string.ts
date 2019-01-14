@@ -1,6 +1,6 @@
 import { requireFromString } from '../src';
 import { LocalLambda } from '../src';
-import { funcToZip } from '../src/util';
+import { funcToZip } from '../src';
 import { createFunction } from './util/util';
 
 it('requireFromString: exports', () => {
@@ -15,15 +15,17 @@ it('requireFromString: module.exports', () => {
   expect(handler(3)).toBe(6);
 });
 
-it('fetch function from requireFromString and pass to LocalLambda', async (done) => {
+it('fetch function from requireFromString and pass to LocalLambda', async done => {
   const localLambda = new LocalLambda();
-  const {handler} = requireFromString(`module.exports.handler = (_e, _c, cb) => {cb(null, {message: 'hello world'})}`);
+  const { handler } = requireFromString(
+    `module.exports.handler = (_e, _c, cb) => {cb(null, {message: 'hello world'})}`
+  );
   await createFunction(localLambda, {
-    Code: {ZipFile: funcToZip(handler)},
+    Code: { ZipFile: funcToZip(handler) },
     FunctionName: 'hello',
     Handler: 'index.handler',
     Role: '-',
-    Runtime: 'nodejs8.10',
+    Runtime: 'nodejs8.10'
   });
 
   localLambda.invoke({ FunctionName: 'hello' }, (err, result) => {
@@ -38,7 +40,7 @@ it('fetch function from requireFromString and pass to LocalLambda', async (done)
       const payload = JSON.parse(result!.Payload as string);
       expect(payload.message).toBe('hello world');
       done();
-    } catch(e) {
+    } catch (e) {
       fail(e);
     }
   });
