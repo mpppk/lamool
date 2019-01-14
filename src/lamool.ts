@@ -1,5 +1,6 @@
 import { CreateFunctionRequest, InvocationRequest, ListFunctionsRequest, Types } from 'aws-sdk/clients/lambda';
 import * as Lambda from 'aws-sdk/clients/lambda';
+import axios from 'axios';
 import { WorkerPoolOptions, WorkerPoolStats } from 'workerpool';
 import * as workerpool from 'workerpool';
 import { Callback, IInvokeParams, InvokeCallback, ListFunctionsCallback } from './lambda';
@@ -122,9 +123,9 @@ export const requireFromString = (code: string): any => {
 };
 
 export const requireFromURL = async (url: string): Promise<any> => {
-  const res = await fetch(url);
-  if (!res.body) {
+  const res = await axios.get(url);
+  if (!res.data) {
     throw new Error('failed to require from ' + url);
   }
-  return requireFromString(await res.text());
+  return requireFromString(await res.data);
 };
