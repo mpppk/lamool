@@ -1,23 +1,28 @@
-# lamool - Universal AWS Lambda runtime 
+# lamool - Universal AWS Lambda runtime
+
+[![codecov](https://codecov.io/gh/mpppk/lamool/branch/master/graph/badge.svg)](https://codecov.io/gh/mpppk/lamool)
 
 ## Features
-* Universal: you can execute lambda function on
-     * nodejs (child_process)
-     * browser (Web worker)
-     * fallback to main thread
-* Offload workloads to AWS Lambda
-* AWS Lambda SDK API compatible
 
-## Benefits 
-* Reduce time of CPU heavy processing
-* Off the main thread
-* Reduce cost of AWS
-* Reduce network traffic
-* Easy to build multi core applications
-* Easy to adopt introduce to existing applications using AWS Lambda
-* Realize edge/fog computing
+- Universal: you can execute lambda function on
+  - nodejs (child_process)
+  - browser (Web worker)
+  - fallback to main thread
+- Offload workloads to AWS Lambda
+- AWS Lambda SDK API compatible
+
+## Benefits
+
+- Reduce time of CPU heavy processing
+- Off the main thread
+- Reduce cost of AWS
+- Reduce network traffic
+- Easy to build multi core applications
+- Easy to adopt introduce to existing applications using AWS Lambda
+- Realize edge/fog computing
 
 ## Getting Started
+
 Following code works in both Node.js and browser.
 
 ```js
@@ -48,7 +53,7 @@ const lambda = new Lamool();
     Handler: 'index.handler', // The name of the method within your code that Lambda calls to execute your function
     // If you upload function via funcToZip, Handler must be 'index.handler'
     Role: 'arn:aws:iam::000000000000:role/SomeRole', // The Amazon Resource Name (ARN) of the function's execution role.
-    Runtime: 'nodejs8.10', // The runtime version for the function
+    Runtime: 'nodejs8.10' // The runtime version for the function
   };
 
   const invokeParams = {
@@ -58,13 +63,21 @@ const lambda = new Lamool();
 
   // Creates a new Lambda function
   lambda.createFunction(createFunctionParams, (err, data) => {
-    if (err) { console.error(err); return; }
+    if (err) {
+      console.error(err);
+      return;
+    }
     console.log('function creating is succeed:', data);
 
     // Invokes a Lambda function
-    lambda.invoke(invokeParams, (err, data) =>{
-      if (err) { console.error(err); return; }
-      if (!data.Payload) { console.error('payload is empty'); }
+    lambda.invoke(invokeParams, (err, data) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      if (!data.Payload) {
+        console.error('payload is empty');
+      }
 
       // data.Payload is the JSON representation of the object returned by the Lambda function
       const payload = JSON.parse(data.Payload);
@@ -96,7 +109,7 @@ $ node getting_tarted.js
 ```
 
 ## installation
+
 ```sh
 $ npm install lamool
 ```
-
