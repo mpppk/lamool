@@ -4,7 +4,8 @@
   "jsRules": {},
   "rules": {
     "variable-name": [true, "allow-leading-underscore"],
-    "object-literal-key-quotes": [true, "as-needed"]
+    "object-literal-key-quotes": [true, "as-needed"],
+    "interface-name": false
   },
   "rulesDirectory": []
 }

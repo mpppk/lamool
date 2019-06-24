@@ -18,6 +18,12 @@ export interface ILamoolOption {
   workerPool: WorkerPoolOptions;
 }
 
+type LambdaRuntime = 'aws' | 'local';
+
+export interface InvocationAcceptanceResult {
+  lambdaRuntime: LambdaRuntime;
+}
+
 export class Lamool {
   public static alwaysRunLocal(_: ILamoolContext): boolean {
     return true;
@@ -68,12 +74,13 @@ export class Lamool {
     this.localLambda.createFunction(params, internalCallback);
   }
 
-  public invoke(params: IInvokeParams, callback: InvokeCallback) {
+  public invoke(params: IInvokeParams, callback: InvokeCallback): InvocationAcceptanceResult {
     if (this.checkFunctionShouldBeRunLocal()) {
       this.localLambda.invoke(params, callback);
-      return;
+      return { lambdaRuntime: 'local' };
     }
     this.invokeOnLambda(params, callback);
+    return { lambdaRuntime: 'aws' };
   }
 
   public listFunctions(params: ListFunctionsRequest, callback: ListFunctionsCallback) {
@@ -111,15 +118,14 @@ export class Lamool {
     if (!this.lambda) {
       return true;
     }
-    return this.strategy({stats: this.localLambda.stats()});
+    return this.strategy({ stats: this.localLambda.stats() });
   }
 }
 
 export const requireFromString = (code: string): any => {
-  const wrapperFuncCode = 'const module = {exports: {}};' +
-    'const exports = module.exports;' +
-    code + '; return module.exports;';
-  return Function( wrapperFuncCode)();
+  const wrapperFuncCode =
+    'const module = {exports: {}};' + 'const exports = module.exports;' + code + '; return module.exports;';
+  return Function(wrapperFuncCode)();
 };
 
 export const requireFromURL = async (url: string): Promise<any> => {
