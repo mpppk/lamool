@@ -18,10 +18,10 @@ export interface ILamoolOption {
   workerPool: WorkerPoolOptions;
 }
 
-type LambdaRuntime = 'aws' | 'local';
+export type LambdaEnvironment = 'aws' | 'local';
 
 export interface InvocationAcceptanceResult {
-  lambdaRuntime: LambdaRuntime;
+  environment: LambdaEnvironment;
 }
 
 export class Lamool {
@@ -77,10 +77,10 @@ export class Lamool {
   public invoke(params: IInvokeParams, callback: InvokeCallback): InvocationAcceptanceResult {
     if (this.checkFunctionShouldBeRunLocal()) {
       this.localLambda.invoke(params, callback);
-      return { lambdaRuntime: 'local' };
+      return { environment: 'local' };
     }
     this.invokeOnLambda(params, callback);
-    return { lambdaRuntime: 'aws' };
+    return { environment: 'aws' };
   }
 
   public listFunctions(params: ListFunctionsRequest, callback: ListFunctionsCallback) {
