@@ -21,6 +21,7 @@ export interface ILamoolOption {
 export type LambdaEnvironment = 'aws' | 'local';
 
 export interface InvocationAcceptanceResult {
+  invokeId: number;
   environment: LambdaEnvironment;
 }
 
@@ -37,6 +38,7 @@ export class Lamool {
     return (context: ILamoolContext): boolean => context.stats.pendingTasks <= allowPendingTaskNum;
   }
 
+  private invokeIdMax = 0;
   private readonly lambda: Lambda | null = null;
   private readonly localLambda: LocalLambda;
   private readonly strategy: strategyFunc;
@@ -77,10 +79,10 @@ export class Lamool {
   public invoke(params: IInvokeParams, callback: InvokeCallback): InvocationAcceptanceResult {
     if (this.checkFunctionShouldBeRunLocal()) {
       this.localLambda.invoke(params, callback);
-      return { environment: 'local' };
+      return { environment: 'local', invokeId: this.invokeIdMax++ };
     }
     this.invokeOnLambda(params, callback);
-    return { environment: 'aws' };
+    return { environment: 'aws', invokeId: this.invokeIdMax++ };
   }
 
   public listFunctions(params: ListFunctionsRequest, callback: ListFunctionsCallback) {

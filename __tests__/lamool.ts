@@ -48,6 +48,8 @@ describe('lamool.invoke', () => {
 
     const emptyHandler = () => {}; // tslint:disable-line no-empty
     const result = lamool.invoke({ FunctionName: 'hello' }, emptyHandler);
-    expect(result).toEqual({ environment: 'local' });
+    expect(result).toEqual({ environment: 'local', invokeId: 0 });
+    const result2 = lamool.invoke({ FunctionName: 'hello' }, emptyHandler);
+    expect(result2).toEqual({ environment: 'local', invokeId: 1 });
   });
 });
