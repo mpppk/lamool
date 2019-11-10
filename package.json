@@ -39,7 +39,7 @@
     "@types/node": "10.17.3",
     "@types/workerpool": "5.0.0",
     "codecov": "3.6.1",
-    "copy-webpack-plugin": "5.0.4",
+    "copy-webpack-plugin": "5.0.5",
     "html-webpack-plugin": "3.2.0",
     "husky": "3.0.9",
     "jest": "24.9.0",
