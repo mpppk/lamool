@@ -35,7 +35,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "24.9.1",
-    "@types/jszip": "3.1.7",
+    "@types/jszip": "3.4.0",
     "@types/node": "10.17.58",
     "@types/workerpool": "5.0.0",
     "codecov": "3.8.1",
@@ -60,7 +60,7 @@
   "dependencies": {
     "aws-sdk": "^2.524.0",
     "axios": "^0.21.0",
-    "jszip": "^3.1.5",
+    "jszip": "^3.6.0",
     "workerpool": "^5.0.0"
   }
 }
