@@ -58,7 +58,7 @@
     "webpack-dev-server": "3.11.2"
   },
   "dependencies": {
-    "aws-sdk": "^2.387.0",
+    "aws-sdk": "^2.524.0",
     "axios": "^0.21.0",
     "jszip": "^3.1.5",
     "workerpool": "^5.0.0"
