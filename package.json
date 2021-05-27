@@ -53,7 +53,7 @@
     "tslint-config-prettier": "1.18.0",
     "typedoc": "0.20.36",
     "typescript": "3.9.9",
-    "webpack": "5.37.1",
+    "webpack": "5.38.0",
     "webpack-cli": "3.3.12",
     "webpack-dev-server": "3.11.2"
   },
