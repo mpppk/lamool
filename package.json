@@ -34,7 +34,7 @@
   "author": "mpppk",
   "license": "MIT",
   "devDependencies": {
-    "@types/jest": "24.9.1",
+    "@types/jest": "27.0.2",
     "@types/jszip": "3.4.0",
     "@types/node": "10.17.60",
     "@types/workerpool": "5.0.0",
