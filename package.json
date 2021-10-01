@@ -59,7 +59,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.524.0",
-    "axios": "^0.21.0",
+    "axios": "^0.22.0",
     "jszip": "^3.6.0",
     "workerpool": "^5.0.0"
   }
