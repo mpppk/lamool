@@ -36,7 +36,7 @@
   "devDependencies": {
     "@types/jest": "24.9.1",
     "@types/jszip": "3.4.1",
-    "@types/node": "10.17.60",
+    "@types/node": "20.17.2",
     "@types/workerpool": "5.0.0",
     "codecov": "3.8.3",
     "copy-webpack-plugin": "6.4.1",
