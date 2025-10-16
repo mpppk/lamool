@@ -55,7 +55,7 @@
     "typescript": "3.9.10",
     "webpack": "5.95.0",
     "webpack-cli": "4.10.0",
-    "webpack-dev-server": "4.6.0"
+    "webpack-dev-server": "4.15.2"
   },
   "dependencies": {
     "aws-sdk": "^2.524.0",
